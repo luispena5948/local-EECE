@@ -1,0 +1,100 @@
+-- SNUG Boston 2008 Clock Domain Crossing (CDC) Design & Verification
+-- Rev 1.0 Techniques Using SystemVerilog
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity amcp_send is
+    port (
+        adata    : out std_logic_vector(7 downto 0);
+        a_en     : out std_logic;
+        aready   : out std_logic;
+        adatain  : in std_logic_vector(7 downto 0);
+        asend    : in std_logic;
+        aq2_ack  : in std_logic;
+        aclk     : in std_logic;
+        arst_n   : in std_logic
+    );
+end entity amcp_send;
+
+architecture rtl of amcp_send is
+    signal aack : std_logic; -- acknowledge pulse from pulse generator
+
+    -- Pulse Generator
+    component plsgen
+        port (
+            pulse : out std_logic;
+            q     : out std_logic;
+            d     : in std_logic;
+            clk   : in std_logic;
+            rst_n : in std_logic
+        );
+    end component;
+
+    -- data ready/acknowledge FSM
+    component asend_fsm
+        port (
+            adata    : out std_logic_vector(7 downto 0);
+            a_en     : out std_logic;
+            aready   : out std_logic;
+            adatain  : in std_logic_vector(7 downto 0);
+            asend    : in std_logic;
+            aq2_ack  : in std_logic;
+            aclk     : in std_logic;
+            arst_n   : in std_logic;
+            aack     : in std_logic
+        );
+    end component;
+
+    signal anxt_data : std_logic;
+begin
+    -- Pulse Generator
+    pg1 : plsgen
+        port map (
+            pulse => aack,
+            q     => open,
+            d     => aq2_ack,
+            clk   => aclk,
+            rst_n => arst_n
+        );
+
+    -- data ready/acknowledge FSM
+    fsm : asend_fsm
+        port map (
+            adata    => adata,
+            a_en     => a_en,
+            aready   => aready,
+            adatain  => adatain,
+            asend    => asend,
+            aq2_ack  => aq2_ack,
+            aclk     => aclk,
+            arst_n   => arst_n,
+            aack     => aack
+        );
+
+    -- send next data word
+    anxt_data <= aready and asend;
+
+    -- toggle-flop controlled by anxt_data
+    process (aclk, arst_n)
+    begin
+        if arst_n = '0' then
+            a_en <= '0';
+        elsif rising_edge(aclk) then
+            if anxt_data = '1' then
+                a_en <= not a_en;
+            end if;
+        end if;
+    end process;
+
+    process (aclk, arst_n)
+    begin
+        if arst_n = '0' then
+            adata <= (others => '0');
+        elsif rising_edge(aclk) then
+            if anxt_data = '1' then
+                adata <= adatain;
+            end if;
+        end if;
+    end process;
+end architecture rtl;

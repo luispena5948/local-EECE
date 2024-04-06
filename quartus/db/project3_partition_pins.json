@@ -1,0 +1,37 @@
+{
+	"partitions" : [
+		{
+			"name" : "Top",
+			"pins" : [
+				{
+					"name" : "wrdy",
+					"strict" : false
+				},
+				{
+					"name" : "wptr",
+					"strict" : false
+				},
+				{
+					"name" : "we",
+					"strict" : false
+				},
+				{
+					"name" : "wq2_rptr",
+					"strict" : false
+				},
+				{
+					"name" : "wput",
+					"strict" : false
+				},
+				{
+					"name" : "wclk",
+					"strict" : false
+				},
+				{
+					"name" : "wrst_n",
+					"strict" : false
+				}
+			]
+		}
+	]
+}

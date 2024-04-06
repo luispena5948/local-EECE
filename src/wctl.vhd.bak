@@ -1,0 +1,30 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity wctl is
+    port (
+        wrdy : out std_logic;
+        wptr : out std_logic;
+        we : out std_logic;
+        wput : in std_logic;
+        wq2_rptr : in std_logic;
+        wclk : in std_logic;
+        wrst_n : in std_logic
+    );
+end entity wctl;
+
+architecture RTL of wctl is
+begin
+    we <= wrdy and wput;
+    wrdy <= not (wq2_rptr xor wptr);
+
+    process (wclk, wrst_n)
+    begin
+        if (wrst_n = '0') then
+            wptr <= '0';
+        elsif (rising_edge(wclk)) then
+            wptr <= wptr xor we;
+        end if;
+    end process;
+end architecture RTL;

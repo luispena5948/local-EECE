@@ -1,0 +1,10 @@
+|wctl
+wrdy <= wrdy_line.DB_MAX_OUTPUT_PORT_TYPE
+wptr <= wptr_line.DB_MAX_OUTPUT_PORT_TYPE
+we <= we_line.DB_MAX_OUTPUT_PORT_TYPE
+wput => we_line.IN1
+wq2_rptr => wrdy_line.IN1
+wclk => wptr_line.CLK
+wrst_n => wptr_line.ACLR
+
+
